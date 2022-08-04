@@ -95,7 +95,10 @@ def parse_status(homework):
     if homework_status not in VERDICTS:
         raise ValueError(f'{homework_status} отсутствует в словаре verdicts')
     return ('Изменился статус проверки работы "{homework_name}". '
-            '{verdict}'.format(homework_name=homework_name, verdict=VERDICTS.get(homework_status)))
+            '{verdict}'
+            ).format(
+                homework_name=homework_name,
+                verdict=VERDICTS.get(homework_status))
 
 
 def check_tokens():
@@ -149,11 +152,15 @@ def main():
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
-        '%(asctime)s: [%(filename)s:%(lineno)s - %(funcName)s] %(levelname)s - %(message)s'
+        ('%(asctime)s: '
+         '[%(filename)s:%(lineno)s - %(funcName)s]'
+         ' %(levelname)s - %(message)s')
     )
     stdout_handler = logging.StreamHandler(stream=sys.stdout)
     stdout_handler.setFormatter(formatter)
-    file_handler = logging.FileHandler((__name__.strip('_'))+'.log', encoding='utf-8')
+    file_handler = logging.FileHandler(
+        (__name__.strip('_')) + '.log', encoding='utf-8'
+    )
     file_handler.setFormatter(formatter)
     logger.addHandler(stdout_handler)
     logger.addHandler(file_handler)
