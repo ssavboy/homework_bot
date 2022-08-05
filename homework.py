@@ -118,6 +118,39 @@ def check_tokens():
     return all((PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID))
 
 
+def runner(current_timestamp, current_report, prev_report, bot):
+    """Main is too complex."""
+    try:
+        response = get_api_answer(current_timestamp)
+        current_timestamp = response.get('current_date', current_timestamp)
+        homeworks = check_response(response)
+        if homeworks:
+            homework = homeworks[0]
+            current_report['name'] = homework.get('homework_name')
+            current_report['message'] = homework.get('status')
+        else:
+            current_report['message'] = 'Нового статуса нет.'
+        if current_report != prev_report:
+            send_message(bot, current_report.get('message'))
+            prev_report = current_report.copy()
+        else:
+            logger.error('Нет нового статуса.')
+    except exceptions.NotForReference as error:
+        logger.exception(error)
+    except Exception as error:
+        message = f'Сбой в работе программы: {error}'
+        logger.exception(message)
+        current_report['message'] = message
+        if current_report != prev_report:
+            try:
+                send_message(bot, message)
+            except Exception as error:
+                logger.exception(error)
+            prev_report = current_report.copy()
+    finally:
+        time.sleep(RETRY_TIME)
+
+
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
@@ -133,35 +166,7 @@ def main():
         'output': ''
     }
     while True:
-        try:
-            response = get_api_answer(current_timestamp)
-            current_timestamp = response.get('current_date', current_timestamp)
-            homeworks = check_response(response)
-            if homeworks:
-                homework = homeworks[0]
-                current_report['name'] = homework.get('homework_name')
-                current_report['message'] = homework.get('status')
-            else:
-                current_report['message'] = 'Нового статуса нет.'
-            if current_report != prev_report:
-                send_message(bot, current_report.get('message'))
-                prev_report = current_report.copy()
-            else:
-                logger.error('Нет нового статуса.')
-        except exceptions.NotForReference as error:
-            logger.exception(error)
-        except Exception as error:
-            message = f'Сбой в работе программы: {error}'
-            logger.exception(message)
-            current_report['message'] = message
-            if current_report != prev_report:
-                try:
-                    send_message(bot, message)
-                except Exception as error:
-                    logger.exception(error)
-                prev_report = current_report.copy()
-        finally:
-            time.sleep(RETRY_TIME)
+        runner(current_timestamp, current_report, prev_report, bot)
 
 
 if __name__ == '__main__':
