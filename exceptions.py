@@ -34,7 +34,7 @@ class NotForReference(Exception):
     pass
 
 
-class ExceptionForTelegram(Exception):
+class ExceptionForTelegram(NotForReference):
     """Исключения которые необходимо отравить в Telegram."""
 
     pass
