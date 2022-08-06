@@ -36,7 +36,7 @@ def send_message(bot, message):
     logger.info('Начало отправки сообщения.')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except telegram.error.NetworkError as error:
+    except telegram.error.TelegramError as error:
         raise exceptions.NotForReference(error)
     else:
         logger.info('Сообщение отправлено.')
